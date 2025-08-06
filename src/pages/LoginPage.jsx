@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/authContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -8,83 +9,95 @@ export default function LoginPage() {
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError(''); // Clear error on input change
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    await login({ email: form.email, password: form.password });
-    // Reload the page to fetch fresh data and state after login
-    window.location.reload();
-    // Optionally navigate (may not be needed if reload resets state)
-    navigate('/products');
-  } catch (err) {
-    console.error('Login failed', err);
-    setError('Invalid email or password.');
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      const user = await login({ email: form.email, password: form.password });
+
+      if (!user || !user.role) {
+        toast.error('Login failed: User role missing.');
+        setLoading(false);
+        return;
+      }
+
+      if (user.role === 'admin') {
+        navigate('/admin/add-product');
+      } else {
+        navigate('/products');
+      }
+
+    } catch (err) {
+      console.error('Login failed', err);
+      toast.error('Invalid email or password.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-blue-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm space-y-5"
-      >
-        <h2 className="text-2xl font-bold text-center text-gray-800">Sign In</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="w-full max-w-md bg-white shadow-lg rounded-3xl p-8 border border-gray-200 animate-fadeIn">
+        <h2 className="text-3xl font-extrabold text-center mb-6 text-gray-800">
+          Welcome Back 👋
+        </h2>
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm">
-            {error}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+              required
+              className="w-full px-4 py-3 rounded-xl bg-gray-50 text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
           </div>
-        )}
 
-        <input
-          type="email"
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          placeholder="Email"
-          required
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700">Password</label>
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="••••••••"
+              required
+              className="w-full px-4 py-3 rounded-xl bg-gray-50 text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
 
-        <input
-          type="password"
-          name="password"
-          value={form.password}
-          onChange={handleChange}
-          placeholder="Password"
-          required
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-3 rounded-xl text-white font-semibold text-lg shadow-md transition ${
+              loading
+                ? 'bg-purple-300 cursor-not-allowed'
+                : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600'
+            }`}
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full text-white py-3 rounded-lg transition ${
-            loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-          }`}
-        >
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-
-        <p className="text-sm text-center text-gray-600">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-blue-600 hover:underline">
-            Register
-          </Link>
-        </p>
-      </form>
+          <p className="text-center text-sm text-gray-500">
+            Don’t have an account?{' '}
+            <Link
+              to="/register"
+              className="text-purple-600 hover:underline font-medium"
+            >
+              Register here
+            </Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
