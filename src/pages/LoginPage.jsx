@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/authContext';
+import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -28,7 +28,7 @@ export default function LoginPage() {
       }
 
       if (user.role === 'admin') {
-        navigate('/admin/add-product');
+        navigate('/admin/Admin-Dashbaord');
       } else {
         navigate('/products');
       }

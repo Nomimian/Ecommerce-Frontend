@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
-import { useAuth } from '../context/authContext';
+import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -26,14 +26,16 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      // const user = await register(form);
+      // ✅ Call backend register API through AuthContext
+      await register(form);
+
       toast.success('Registered successfully! Please login to continue.');
-      setTimeout(() => {
-        navigate('/login');
-      }, 1000);
+      setTimeout(() => navigate('/login'), 1200);
     } catch (err) {
       console.error('Registration error:', err);
-      toast.error('Error: ' + (err?.message || 'Something went wrong.'));
+      toast.error(
+        err.response?.data?.message || 'Registration failed. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -51,7 +53,9 @@ export default function RegisterPage() {
 
         {/* Full Name */}
         <div className="relative">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Full Name
+          </label>
           <input
             type="text"
             name="name"
@@ -65,7 +69,9 @@ export default function RegisterPage() {
 
         {/* Email */}
         <div className="relative">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Email
+          </label>
           <input
             type="email"
             name="email"
@@ -79,7 +85,9 @@ export default function RegisterPage() {
 
         {/* Password */}
         <div className="relative">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Password
+          </label>
           <input
             type="password"
             name="password"
@@ -93,7 +101,9 @@ export default function RegisterPage() {
 
         {/* Role */}
         <div className="relative">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Select Role</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Select Role
+          </label>
           <select
             name="role"
             value={form.role}
@@ -119,7 +129,10 @@ export default function RegisterPage() {
         {/* Login Link */}
         <p className="text-center text-sm text-gray-500">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-purple-600 hover:underline">
+          <Link
+            to="/login"
+            className="font-medium text-purple-600 hover:underline"
+          >
             Login
           </Link>
         </p>
